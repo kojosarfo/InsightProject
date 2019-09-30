@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Sep 12 14:09:05 2019
+
+@author: kojosarfo
+"""
+
+import numpy as np
+import pandas as pd
+from datetime import datetime
+import os
+import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.dates as mdates
+
+TorontoData = pd.read_csv(os.getcwd()+'/cycped_vol.csv');
+dateTimes = pd.to_datetime((TorontoData.iloc[:,1]), dayfirst = True);
+TorontoData.insert(2,'DateTimes',dateTimes);
+
+Intersections = np.unique(TorontoData.iloc[:,0]);
+# Select intersection
+
+IntID = Intersections[0]; #First intersection selected
+
+SelectedIntersection = \
+TorontoData[TorontoData['intersection_uid'] == IntID];
+
+Peds = SelectedIntersection[SelectedIntersection['classification_uid']==6]
+grouped=Peds.groupby('DateTimes');
+groupA=grouped.last(); groupA=groupA.iloc[:,0:groupA.shape[1]-1]
+groupA.insert(2,'DateTimes',groupA.index.get_level_values(0))
+groupB=grouped.sum();
+groupB=groupB.iloc[:,-1];
+Peds=pd.concat([groupA,groupB],axis=1,sort=False)
+
+
+
+
+
+
+
+
+
+
+TorontoData.insert(3,'Day',dateTimes.dt.day)
+TorontoData.insert(4,'DayOfWeek',dateTimes.dt.dayofweek)
+TorontoData.insert(5,'DayOfYear',dateTimes.dt.dayofyear)
+TorontoData.insert(6,'Month',dateTimes.dt.month)
+TorontoData.insert(7,'Hour',dateTimes.dt.hour)
+TorontoData.insert(8,'Minute',dateTimes.dt.minute)
+
+
+Intersections=np.unique(TorontoData.iloc[:,0]);
+numIntersections=len(Intersections);
+
+DisaggregatedData=[]
+for i in Intersections:
+    temp=TorontoData[TorontoData.iloc[:,0]==i];
+    DisaggregatedData.append(temp);
+ 
+# Select intersection
+IntID=Intersections[0];
+SelectedIntersection=TorontoData[TorontoData.iloc[:,0]==IntID];
+Peds=SelectedIntersection[SelectedIntersection['classification_uid']==6]
+grouped=Peds.groupby('DateTimes');
+groupA=grouped.last(); groupA=groupA.iloc[:,0:groupA.shape[1]-1]
+groupA.insert(2,'DateTimes',groupA.index.get_level_values(0))
+groupB=grouped.sum();
+groupB=groupB.iloc[:,-1];
+Peds=pd.concat([groupA,groupB],axis=1,sort=False)
+
+resampled=Peds.resample('5Min');
+
+Cycs=SelectedIntersection[SelectedIntersection['classification_uid']==2]
+grouped=Cycs.groupby('DateTimes');
+groupA=grouped.last(); groupA=groupA.iloc[:,0:groupA.shape[1]-1]
+groupA.insert(2,'DateTimes',groupA.index.get_level_values(0))
+groupB=grouped.sum();
+groupB=groupB.iloc[:,-1];
+Cycs=pd.concat([groupA,groupB],axis=1,sort=False)
+
+
+
+
+
+
+SingleIntersection=DisaggregatedData[IntID];
+SingleDay=SingleIntersection[SingleIntersection.iloc[:,5]==121]
+Pedestrians=SingleDay[SingleDay['classification_uid']==6]
+Cyclists=SingleDay[SingleDay['classification_uid']==2]
+
+grouped=Pedestrians.groupby('DateTimes');
+groupA=grouped.last(); groupA=groupA.iloc[:,0:groupA.shape[1]-1]
+groupA.insert(2,'DateTimes',groupA.index.get_level_values(0))
+groupB=grouped.sum();
+groupB=groupB.iloc[:,-1];
+groupC=pd.concat([groupA,groupB],axis=1,sort=False)
+
+#mdates.DateFormatter('%H:%M')
+plt.figure(1)
+plt.plot(Pedestrians['DateTimes'].dt.time,Pedestrians['volume'],'b')
+plt.plot(Cyclists['DateTimes'].dt.time,Cyclists['volume'],'r')
+plt.grid(True)
+plt.ylabel('Volume')
+plt.title('Adelaide-Bay intersection')
+plt.legend({'Pedestrian','Cyclists'})
+
+
+IntID=6;
+SingleIntersection=DisaggregatedData[IntID];
+SingleDay=SingleIntersection[SingleIntersection.iloc[:,5]==121]
+Pedestrians=SingleDay[SingleDay['classification_uid']==6]
+Cyclists=SingleDay[SingleDay['classification_uid']==2]
+
+plt.figure(2)
+plt.plot(Pedestrians['DateTimes'].dt.time,Pedestrians['volume'],'r')
+plt.plot(Cyclists['DateTimes'].dt.time,Cyclists['volume'],'b')
+plt.grid(True)
+plt.ylabel('Volume')
+plt.title('King-Yonge intersection')
+plt.legend({'Pedestrian','Cyclists'})
+
+IntID=12;
+SingleIntersection=DisaggregatedData[IntID];
+SingleDay=SingleIntersection[SingleIntersection.iloc[:,5]==121]
+Pedestrians=SingleDay[SingleDay['classification_uid']==6]
+Cyclists=SingleDay[SingleDay['classification_uid']==2]
+
+plt.figure(3)
+plt.plot(Pedestrians['DateTimes'].dt.time,Pedestrians['volume'],'g')
+plt.plot(Cyclists['DateTimes'].dt.time,Cyclists['volume'],'r')
+plt.grid(True)
+plt.ylabel('Volume')
+plt.title('Wellington-Blue Jay intersection')
+plt.legend({'Pedestrian','Cyclists'})
+

@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Sep 25 12:21:31 2019
+
+@author: kojosarfo
+"""
+
+from __future__ import print_function
+from sklearn.model_selection import train_test_split
+from sklearn.gaussian_process import GaussianProcessRegressor as gpr
+from sklearn.gaussian_process.kernels import RBF
+import warnings
+import pickle
+import numpy as np
+import pandas as pd
+
+#import numpy as np
+import matplotlib.pyplot as plt
+warnings.filterwarnings("ignore")
+plt.style.use('fivethirtyeight')
+#import statsmodels.api as sm
+import matplotlib
+
+#Some plot settings
+matplotlib.rcParams['axes.labelsize'] = 14
+matplotlib.rcParams['xtick.labelsize'] = 12
+matplotlib.rcParams['ytick.labelsize'] = 12
+matplotlib.rcParams['text.color'] = 'k'
+plt.close('all')
+pd.plotting.register_matplotlib_converters()
+
+    
+filename = 'stackedPeds.sav'
+trainPeds = pickle.load(open(filename, 'rb'))
+
+filename = 'stackedCycs.sav'
+trainCycs = pickle.load(open(filename, 'rb'))
+
+
+#%% Training for Pedestrians data
+
+trainPeds = trainPeds.dropna()
+    
+#X = trainPeds[['Hour','Day','DayOfWeek','Month','isHoliday','tempC',
+#       'FeelsLikeC','humidity','cloudcover','visibility',
+#       'windspeedKmph']]
+
+#X = trainPeds[['Hour','DayOfWeek','isHoliday','tempC','visibility']]
+
+X = trainPeds[['Hour','DayOfWeek','isHoliday','lat','lng']] #Best
+Y = trainPeds[['volume']]
+
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
+
+kernel = RBF()
+gprMdl = gpr(kernel=kernel, random_state=0, normalize_y=True, alpha=0.01).fit(X_train, y_train)
+yPred, y_std = gprMdl.predict(X_test, return_std=True)
+yPred = yPred.astype('int'); yPred[yPred<0]=0
+
+print('RMSE: '+str(np.sqrt(np.mean((yPred-y_test.values)**2))))
+
+print('R_Squared: '+str(gprMdl.score(X_test,y_test)))
+
+plt.plot(y_test.index, y_test.values,'ro')
+plt.plot(y_test.index, yPred, 'bo')
+
+
+#%% Training on Cyclists data
+
+trainCycs = trainCycs.dropna()
+    
+#X = trainPeds[['Hour','Day','DayOfWeek','Month','isHoliday','tempC',
+#       'FeelsLikeC','humidity','cloudcover','visibility',
+#       'windspeedKmph']]
+
+#X = trainPeds[['Hour','DayOfWeek','isHoliday','tempC','visibility']]
+
+X = trainPeds[['Hour','DayOfWeek','isHoliday','lat','lng']] #Best
+Y = trainPeds[['volume']]
+
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
+
+kernel = RBF()
+gprMdl = gpr(kernel=kernel, random_state=0, normalize_y=True, alpha=0.01).fit(X_train, y_train)
+yPred, y_std = gprMdl.predict(X_test, return_std=True)
+yPred = yPred.astype('int'); yPred[yPred<0]=0
+
+print('RMSE: '+str(np.sqrt(np.mean((yPred-y_test.values)**2))))
+
+print('R_Squared: '+str(gprMdl.score(X_test,y_test)))
+
+plt.plot(y_test.index, y_test.values,'ro')
+plt.plot(y_test.index, yPred, 'bo')

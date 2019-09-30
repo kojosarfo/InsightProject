@@ -1,0 +1,16 @@
+intersection_uid,intersection_name,street_main,street_cross,lat,lng,px
+3,Adelaide / Bay,Adelaide,Bay,43.649924,-79.380738,62
+4,Adelaide / Jarvis,Adelaide,Jarvis,43.651518,-79.37227,4
+5,Front / Bathurst,Front,Bathurst,43.640752,-79.401359,297
+11,King / Portland,King,Portland,43.644448,-79.400078,1225
+13,King / Peter,King,Peter,43.646034,-79.392285,1152
+17,King / Bay,King,Bay,43.648632,-79.380226,61
+18,King / Yonge,King,Yonge,43.649173,-79.377894,31
+19,King / Church,King,Church,43.64992,-79.374365,16
+20,King / Jarvis,King,Jarvis,43.650456,-79.371867,3
+27,Richmond / Spadina,Richmond,Spadina,43.647871,-79.395979,275
+28,Richmond / Bay,Richmond,Bay,43.651168,-79.38131,63
+30,Wellington / Blue Jays,Wellington,Blue Jays,43.644715,-79.391774,1682
+31,Wellington / Bay,Wellington,Bay,43.647315,-79.379689,60
+32,King / John,King,John,43.646594,-79.38974,1320
+22,Queen / Bathurst,Queen,Bathurst,43.6472,-79.403967,296

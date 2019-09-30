@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Sep 20 13:38:19 2019
+
+@author: kojosarfo
+"""
+
+import warnings
+import pickle
+import numpy as np
+import itertools
+import random
+import matplotlib.pyplot as plt
+warnings.filterwarnings("ignore")
+plt.style.use('fivethirtyeight')
+import pandas as pd
+import statsmodels.api as sm
+import matplotlib
+from sklearn.gaussian_process import GaussianProcessRegressor as GPR
+from sklearn.model_selection import TimeSeriesSplit
+matplotlib.rcParams['axes.labelsize'] = 14
+matplotlib.rcParams['xtick.labelsize'] = 12
+matplotlib.rcParams['ytick.labelsize'] = 12
+matplotlib.rcParams['text.color'] = 'k'
+plt.close('all')
+
+from DataStructuring import get_data
+
+Pedestrians, Cyclists = get_data()
+
+filename = 'PedestriansData.sav'
+pickle.dump(Pedestrians, open(filename, 'wb'))
+
+filename = 'CyclistsData.sav';
+pickle.dump(Cyclists, open(filename, 'wb'))
+
+
+#Selection of ARIMA order parameters on one intersection and
+# one fold in the training set
+
+#Selecting data for first intersection
+Peds = Pedestrians[0];
+DataSize = Peds.shape[0];
+FirstDay = Peds['DayOfYear'][0]
+LastDay = Peds['DayOfYear'][-1]
+
+PredHorizon = 7; #1 week given in terms of days
+TrainSize = 7*4 #8 weeks given in terms of days
+
+TestSets = np.arange(FirstDay + TrainSize, LastDay - PredHorizon + 1);
+
+DayNum = TestSets[0]
+
+xTrain = Peds[(Peds['DayOfYear']< DayNum) & 
+              (Peds['DayOfYear'] >= DayNum - TrainSize)];           
+timeIdx = xTrain['dateTimeIdx'];
+traffic = xTrain['volume'];
+traffic.fillna(method='ffill');
+
+#exog = xTrain['tempC'];
+
+p = d = q = range(0, 2)
+pdq = list(itertools.product(p, d, q))
+seasonal_pdq = [(x[0], x[1], x[2], 24*7) for x in pdq]
+
+minAIC=np.Inf;        
+for param in pdq:
+    for param_seasonal in seasonal_pdq:
+        try:
+            mdl = sm.tsa.statespace.SARIMAX(traffic,
+            order = param, seasonal_order = param_seasonal,
+            enforce_stationarity = False, enforce_invertibility = False)
+            results = mdl.fit(disp=0)
+            if results.aic < minAIC:
+                minAIC = results.aic
+                bestMdl = mdl;
+                non_seasonal = param;
+                seasonal = param_seasonal;
+            print('ARIMA{}x{} - AIC:{}'.format(param, param_seasonal, results.aic))
+        except:
+            continue
+
+non_seasonal = (1,0,1); seasonal = (1,1,0,24*7); #Optimal in terms of AIC
+
+filename = 'arima_mdl.sav';
+pickle.dump(results, open(filename, 'wb'))
+
+print(results.summary().tables[1])
+
+     
+sampleIntersections = random.sample(Pedestrians,round(0.8*len(Pedestrians)))
+sampleVolumes = np.zeros([PredHorizon*7,len(sampleIntersections)]);
+for i in range(len(sampleIntersections)):
+    Peds = sampleIntersections[i];
+    
+    xTrain = Peds[(Peds['DayOfYear']<DayNum) & 
+                  (Peds['DayOfYear']>=DayNum-TrainSize)];           
+    trainTimes = xTrain['dateTimeIdx'];
+    trainVolumes = xTrain['volume'];
+    trainVolumes.fillna(method='ffill');
+    
+    exog = xTrain['tempC'];
+    
+    mdl = sm.tsa.statespace.SARIMAX(trainVolumes,
+    order = non_seasonal, seasonal_order = seasonal,
+    enforce_stationarity = False, enforce_invertibility = False)
+    
+    results = mdl.fit(disp=0)
+    print(results.summary().tables[1])
+    
+    xTest = Peds[(Peds['DayOfYear'] >= DayNum) & 
+             (Peds['DayOfYear'] <= DayNum + PredHorizon)];
+                 
+    testTimes = xTest['dateTimeIdx'];
+    testVolumes = xTest['volume']
+
+    startDate = xTest['dateTimeIdx'][0];
+    endDate = xTest['dateTimeIdx'][-1];
+     
+    pred = results.get_prediction(start=len(trainVolumes), end=len(trainVolumes)+len(testVolumes)-1)
+    
+    forecast = pred.predicted_mean;
+    forecast = round(forecast); forecast[forecast<0]=0;
+    
+    sampleVolumes[i,:] = forecast;

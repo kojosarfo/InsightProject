@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Sep 23 12:29:22 2019
+
+@author: kojosarfo
+"""
+
+from __future__ import print_function
+from IPython.display import display
+from ipywidgets import interact, interactive, fixed, interact_manual
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.model_selection import train_test_split
+from sklearn.gaussian_process import GaussianProcessRegressor as gpr
+from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ExpSineSquared
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+import random
+import ipywidgets as widgets
+import folium
+import tensorflow as tf
+from folium.plugins import HeatMap, HeatMapWithTime
+import warnings
+import pickle
+import numpy as np
+import pandas as pd
+from datetime import datetime
+from fbprophet import Prophet
+#import numpy as np
+import matplotlib.pyplot as plt
+warnings.filterwarnings("ignore")
+plt.style.use('fivethirtyeight')
+import pandas as pd
+#import statsmodels.api as sm
+import matplotlib
+from DataStructuring import get_data
+
+#Some plot settings
+matplotlib.rcParams['axes.labelsize'] = 14
+matplotlib.rcParams['xtick.labelsize'] = 12
+matplotlib.rcParams['ytick.labelsize'] = 12
+matplotlib.rcParams['text.color'] = 'k'
+plt.close('all')
+pd.plotting.register_matplotlib_converters()
+
+
+#This cell requires either the files: ('PedestriansData.sav' and 'CyclistsData.sav') or ('cycped_vol.csv' and 'weather.csv')
+    
+filename = 'PedestriansData.sav'
+Pedestrians = pickle.load(open(filename, 'rb'))
+
+filename = 'CyclistsData.sav'
+Cyclists = pickle.load(open(filename, 'rb'))
+
+filename = 'Locations.sav'
+Locations = pickle.load(open(filename, 'rb'))
+
+# Pedestrians, Cyclists, Locations = get_data()
+
+trainStart = pd.to_datetime('2019-05-01 00:00:00');
+trainEnd = pd.to_datetime('2019-07-31 00:00:00');
+
+allPeds = np.empty([1,9]); allPeds[:] = np.nan;
+allCycs = np.empty([1,9]); allCycs[:] = np.nan;
+for i in range(len(Pedestrians)):
+    Peds = Pedestrians[i]
+    T = Peds[trainStart:trainEnd][['volume','dateTimeIdx','Hour','DayOfWeek','isHoliday','tempC','visibility']]
+    lats = np.ones([len(T),1])*Locations.iloc[i,0]
+    longs = np.ones([len(T),1])*Locations.iloc[i,1]
+    Z = np.column_stack((T.values, lats, longs))
+    
+    allPeds = np.row_stack((allPeds,Z))
+    
+    Cycs = Cyclists[i]
+    T = Cycs[trainStart:trainEnd][['volume','dateTimeIdx','Hour','DayOfWeek','isHoliday','tempC','visibility']]
+    lats = np.ones([len(T),1])*Locations.iloc[i,0]
+    longs = np.ones([len(T),1])*Locations.iloc[i,1]
+    Z = np.column_stack((T.values, lats, longs))
+    
+    allCycs = np.row_stack((allCycs,Z))
+
+allPeds = pd.DataFrame(allPeds,columns=['volume','dateTimeIdx','Hour','DayOfWeek','isHoliday','tempC','visibility','lat','lng'])
+allPeds.index = allPeds['dateTimeIdx']
+allCycs = pd.DataFrame(allCycs,columns=['volume','dateTimeIdx','Hour','DayOfWeek','isHoliday','tempC','visibility','lat','lng'])
+allCycs.index = allCycs['dateTimeIdx']
+
+filename = 'stackedPeds.sav'
+with open(filename, 'wb') as handle:
+    pickle.dump(allPeds, handle)
+    
+filename = 'stackedCycs.sav'
+with open(filename, 'wb') as handle:
+    pickle.dump(allCycs, handle)
+    
+filename = 'stackedPeds.sav'
+trainPeds = pickle.load(open(filename, 'rb'))
+
+filename = 'stackedCycs.sav'
+trainCycs = pickle.load(open(filename, 'rb'))
+    
+
+#D= pedsData
+D = Pedestrians[0];
+
+D = D.dropna()
+    
+#X = D[['Hour','Day','DayOfWeek','Month','isHoliday','tempC',
+#       'FeelsLikeC','humidity','cloudcover','visibility',
+#       'windspeedKmph']]
+
+#X = D[['Hour','DayOfWeek','isHoliday','tempC','visibility']]
+
+X = D[['Hour','DayOfWeek','isHoliday']] #Best
+#X= D.iloc[:,1:-1]; Y= D.iloc[:,0];
+
+ 
+#print(pca.explained_variance_ratio_*100)  
+
+Y = D[['volume']]
+
+#X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
+
+X_train = X.iloc[0:2000,:]; y_train = Y.iloc[0:2000]
+X_test = X.iloc[2000:-1]; y_test = Y.iloc[2000:-1]
+
+pca = PCA()
+pca.fit(X_train) 
+
+X_train_pca=pca.transform(X_train)
+X_train_pca=X_train_pca[:,0:4]
+
+scaler = MinMaxScaler()
+scaler.fit(X_train)
+
+xTrain = scaler.transform(X_train)
+
+X_test_pca=pca.transform(X_test)
+X_test_pca=X_test_pca[:,0:4]
+xTest = scaler.transform(X_test)
+
+kernel = RBF()
+gprMdl = gpr(kernel=kernel, random_state=0, normalize_y=True, alpha=0.01).fit(X_train, y_train)
+yPred, y_std = gprMdl.predict(X_test, return_std=True)
+yPred = yPred.astype('int'); yPred[yPred<0]=0
+
+print('RMSE: '+str(np.sqrt(np.mean((yPred-y_test.values)**2))))
+
+print('R_Squared: '+str(gprMdl.score(X_test,y_test)))
+
+plt.plot(y_test.index, y_test.values,'r-')
+plt.plot(y_test.index, yPred, 'b-')
