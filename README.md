@@ -17,9 +17,12 @@ The Big Data Innovation Team at the City of Toronto has only now acquired some h
 
 However, the peculiarities of the problem do not allow a straightforward application of classical forecasting techniques. While we're looking to predict pedestrian/cyclist traffic about two weeks into the future, there are often significant periods of missing data due to ocasional breakdowns of traffic monitors, so that the forecast model should also be capable of gap-filling these intervals of missing data. Furthermore, not all interesections in Downtown have these traffic monitors, and consequently, the model has to be able to provide estimates for those intersections that are not currently monitored.
 
+Data
+------
+
 A csv dump of data detailing the pedestrian and cyclist volumes observed at approximately 14 intersections in downtown Toronto between May and August 2019 inclusive has been provided. The sampling frequency at each intersection is 1 to 2 minutes, each intersection is monitored 24 hours a day, and volumes are disaggregated by direction of travel.
 
-Moreover, the Big Data Innovation Team believes that, unlike for vehicular traffic for which they are currently productionising models to predict and gap-fill, pedestrian trafficmuch more sensitive to other factors like weather conditions, and that any predictive model would need to incorporate these data.
+Moreover, the Big Data Innovation Team believes that, unlike for vehicular traffic for which they are currently productionising models to predict and gap-fill traffic volumes, pedestrian traffic are much more sensitive to other factors like weather conditions, and that any predictive model would need to incorporate these data. For this reason, I scraped historical weather data for the period over which the traffic data was collected from World Weather Online, and augmented it to the traffic data.
 
 Method
 ---------
@@ -29,7 +32,7 @@ One non-autoregressive approach to tackling this problem is Gaussian process reg
 
 The training involved in Gaussian process regression is mainly in optimising the length scale parameters of the radial basis function kernel which make up the covariance function, by maximising the marginal likelihood of the data. Being non-parametric, GPR uses the training data for prediction, and is also able to provide the expected value of the test sample as well as the uncertainty of the prediction which is related to the Schur complement.
 
-The main drawback of GPR is that it doesn't scale well with large amounts of training data, since it involves matrix inversion, and thus, its complexity is cubic in terms of the amount of training examples.
+The main drawback of GPR is that it doesn't scale well with large amounts of training data, since it involves matrix inversion, and thus, its complexity is cubic in terms of the amount of training examples. For this reason, the GPR model, on which the web app is based, is trained on only one month's worth of data to make it feasible to host on an AWS Free Tier instance. Better results may be obtained if more computational power and memory are available.
 
 
 Instructions
