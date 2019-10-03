@@ -5,7 +5,7 @@ TrafficSeer
 Predicting pedestrian and cyclist traffic in Downtown Toronto
 
 <img src="pedestrianTraffic.jpg"
-title="Pedestrian traffic in Tokyo" width="150" height="100" />
+width="1000" height="300" />
 
 The webapp can be assessed at: torontotraffic.live:8866
 
