@@ -1,34 +1,44 @@
-Project title
+
+
+TrafficSeer
 -------------
-Analysis and modelling of City of Toronto traffic and transportation network data
+Predicting pedestrian and cyclist traffic in Downtown Toronto
 
-Description
-------------
-The Big Data Innovation Team is creating models to predict traffic volumes in order to understand congestion in Toronto. They are currently productionizing models that enable them fill gaps and predict observed vehicle volumes (number of vehicles over a period of time) at traffic monitoring stations throughout the city, and to estimate values for road segments without monitoring stations. In order to understand congestion from the perspective of all road users, they wish to expand this work to active transportation modes - pedestrians and cyclists - as well. The team believes, however, that these are much more sensitive to factors like weather conditions, land use, and access to road infrastructure (eg. sidewalks and cycling lanes), than vehicles, and that any predictive model would need to incorporate these data.
+<img src="pedestrianTraffic.jpg"
+alt="Markdown Monster icon"
+style="float: left; margin-right: 10px;" />
 
-Description of data
---------------------
-A csv dump of data detailing the pedestrian and cyclist volumes observed at approximately 20 intersections in downtown Toronto between May and August 2019 inclusive have been provided. The sampling frequency at each intersection is 5 minutes, each intersection is monitored 24 hours a day, and volumes are disaggregated by direction of travel. In total, this is approximately 600,000 rows by three columns (intersection ID, timestamp, direction).
-
-Expected deliverable:
-A prototype model that can gap-fill and extrapolate observed pedestrian and cyclist volumes, as well as estimate volumes at intersections with only short-term data (a few days’ worth) is required. Additionally, corresponding testing documentation on how error metrics (eg. mean square or mean absolute error) change with hyperparameter or model architecture choices is desired.
-
-Method
--------
-The above problem requires that the prototype model is able to do the following: 1) forecast pedestrian/ cyclist traffic at intersections with monitoring stations; 2) gap-fill the pedestrian/ cyclist traffic at intersections with monitoring stations; 3) estimate pedestrian/ cyclist traffic at intersections without monitoring stations.
-
-For the purpose of gap-filling the data at given intersections, the presence of missing chunks of data presents the problem of identifying a continuous sequence of traffic data long enough to accurately learn the characteristics of the time-series. Thus, this greatly limits the application of classical time-series forecasting methods such as ARIMA, which requires continuous sequence of data to identify the stationarity of the data and learn the autoregressive and moving average parameters as well as the seasonal parameters. In fact, this problem is not particular to ARIMA only, but to other autoregressive models as well, among which is classical recurrent neural networks or long short term memory networks (LSTM), since the presence of missing data at arbitrary instances greatly limits the amount of useful training data that can be collated to train the models. One might think of training bidirectional LSTMs, so that their forward and backward predictions might be averaged to gap-fill the missing intervals. Apart from the computational complexity involved, training bidirectional LSTMs would only likely work satisfactorily if there are only a handful of missing chunks of data.
-
-Gaussian process regression is a non-parametric alternative that is well-suited for this task. For one thing, it does not require a continuous stream of data, and in this sense, is non-autoregressive... to be continued
-
-Instructions
-------------
 The webapp can be assessed at: torontotraffic.live:8866
 
-The main script is TrafficForecast.ipynb, and can be found under /web_app. This script implements Gaussian process regression forecasting. Example inputs and expected outputs are already set up in this notebook, and can be easily seen by running all the cells in this notebook, once all required packages are installed.
+Description
+-------------
+For many people, the above image looks quite familiar, especially during rush hours. Rush hour traffic can get as high as 6000 people in an hour’s interval. Despite this fact, and the level of congestion as shown here, consideration is hardly given to pedestrians or cyclists during road or maintenance work, only to vehicles.
 
-The following packages are required to run the code: voila, folium, plotly, ipywidgets, numpy, pandas. These can be installed via regular pip or conda commands.
+The Big Data Innovation Team at the City of Toronto has only now acquired some historical data for some 14 intersections in Downtown, and I’m consulting with them to predict pedestrian/ cyclist traffic in Downtown -- in order to better optimise traffic signalling,  and better assess the impact of road closures on pedestrian movement.
+
+However, the peculiarities of the problem do not allow a straightforward application of classical forecasting techniques. While we're looking to predict pedestrian/cyclist traffic about two weeks into the future, there are often significant periods of missing data due to ocasional breakdowns of traffic monitors, so that the forecast model should also be capable of gap-filling these intervals of missing data. Furthermore, not all interesections in Downtown have these traffic monitors, and consequently, the model has to be able to provide estimates for those intersections that are not currently monitored.
+
+A csv dump of data detailing the pedestrian and cyclist volumes observed at approximately 14 intersections in downtown Toronto between May and August 2019 inclusive has been provided. The sampling frequency at each intersection is 1 to 2 minutes, each intersection is monitored 24 hours a day, and volumes are disaggregated by direction of travel.
+
+Moreover, the Big Data Innovation Team believes that, unlike for vehicular traffic for which they are currently productionising models to predict and gap-fill, pedestrian trafficmuch more sensitive to other factors like weather conditions, and that any predictive model would need to incorporate these data.
+
+Method
+---------
+Classical time-series methods such as ARIMA fail, if there are too many chunks of missing data, and in fact, this bottleneck is present in many other autoregressive methods such as time-delayed neural networks (TDNN) or long-short-term-memory networks (LSTMs), since the amount of training data, as well as the length of the history on which the prediction is regressed, becomes limited. Moreover, these models are not well-suited for spatio-temporal regression which is involved in estimating the traffic for intersections not currently monitored.
+
+One non-autoregressive approach to tackling this problem is Gaussian process regression GPR, which, in our case, assumes that the traffic volumes at different intersections are jointly normally distributed, with some constant mean and covariance function. A very common covariance function is the radial basis function kernel, which, being based on the squared Euclidean distance, implies that intersections that are closer together will be more heavily correlated in their traffic volumes than those farther away. This easily provides a Bayesian framework for predicting traffic at locations without historical data, conditioned on the traffic at locations with historical data. More so, one can think of the proximity in the covariance function not just in terms of the spatial co-ordinates of the intersections, but in terms of time as well. For example, the traffic at 8 am today is expected to correlate very well with that at 8:00 tomorrow or 7:58 yesterday, so that GPR presents a way of forecasting or gap-filling missing data conditioned on the data at arbitrary spatio-temporal instances.
+
+The training involved in Gaussian process regression is mainly in optimising the length scale parameters of the radial basis function kernel which make up the covariance function, by maximising the marginal likelihood of the data. Being non-parametric, GPR uses the training data for prediction, and is also able to provide the expected value of the test sample as well as the uncertainty of the prediction which is related to the Schur complement.
+
+The main drawback of GPR is that it doesn't scale well with large amounts of training data, since it involves matrix inversion, and thus, its complexity is cubic in terms of the amount of training examples.
+
+
+Instructions
+--------------
+The main script on which the web app is based is TrafficForecast.ipynb, and can be found under /web_app. This script implements Gaussian process regression. Example inputs and expected outputs are already set up in this notebook, and can be easily seen by running all the cells in this notebook, once all required packages are installed.
+
+The following packages may be required to run the code: voila, folium, plotly, ipywidgets, numpy, pandas. These can be installed via regular pip or conda commands.
 
 Unfortunately, other saved files that are required for this notebook may not be available due to their size.
 
-The training of the Gaussian process regression models are done in the file scripts/trainGPR.py. A squared exponential kernel is used for the training, and the hyperparameters are optimised during fitting using BFGS. Other kernel functions as well as optimisation methods may be used in this script.
+The training of the Gaussian process regression models are done in the file: scripts/trainGPR.py. A squared exponential kernel is used for the training, and the hyperparameters are optimised during fitting using BFGS. Other kernel functions as well as optimisation methods may be used in this script.
