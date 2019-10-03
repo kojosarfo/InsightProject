@@ -7,7 +7,7 @@ Predicting pedestrian and cyclist traffic in Downtown Toronto
 <img src="pedestrianTraffic.jpg"
 width="1000" height="300" />
 
-The webapp can be assessed [here](https://torontotraffic.live:8866)
+The web app can be assessed [here](https://torontotraffic.live:8866)
 
 Description
 -------------
@@ -25,7 +25,7 @@ Method
 ---------
 Classical time-series methods such as ARIMA fail, if there are too many chunks of missing data, and in fact, this bottleneck is present in many other autoregressive methods such as time-delayed neural networks (TDNN) or long-short-term-memory networks (LSTMs), since the amount of training data, as well as the length of the history on which the prediction is regressed, becomes limited. Moreover, these models are not well-suited for spatio-temporal regression which is involved in estimating the traffic for intersections not currently monitored.
 
-One non-autoregressive approach to tackling this problem is Gaussian process regression GPR, which, in our case, assumes that the traffic volumes at different intersections are jointly normally distributed, with some constant mean and covariance function. A very common covariance function is the radial basis function kernel, which, being based on the squared Euclidean distance, implies that intersections that are closer together will be more heavily correlated in their traffic volumes than those farther away. This easily provides a Bayesian framework for predicting traffic at locations without historical data, conditioned on the traffic at locations with historical data. More so, one can think of the proximity in the covariance function not just in terms of the spatial co-ordinates of the intersections, but in terms of time as well. For example, the traffic at 8 am today is expected to correlate very well with that at 8:00 tomorrow or 7:58 yesterday, so that GPR presents a way of forecasting or gap-filling missing data conditioned on the data at arbitrary spatio-temporal instances.
+One non-autoregressive approach to tackling this problem is Gaussian process regression GPR, which, in our case, assumes that the traffic volumes at different intersections are jointly normally distributed, with some constant mean and covariance function. A very common covariance function is the radial basis function kernel, which, being based on the squared Euclidean distance, implies that intersections that are closer together will be more heavily correlated in their traffic volumes than those farther away. This easily provides a Bayesian framework for predicting traffic at locations without historical data, conditioned on the traffic at locations with historical data. More so, one can think of the proximity in the covariance function not just in terms of the spatial co-ordinates of the intersections, but in terms of time as well. For example, all things being equal, the traffic at 8 am today is expected to correlate well with that at 8:00 tomorrow or 7:50 yesterday, so that GPR presents a way of forecasting or gap-filling missing data conditioned on the data at arbitrary spatio-temporal instances.
 
 The training involved in Gaussian process regression is mainly in optimising the length scale parameters of the radial basis function kernel which make up the covariance function, by maximising the marginal likelihood of the data. Being non-parametric, GPR uses the training data for prediction, and is also able to provide the expected value of the test sample as well as the uncertainty of the prediction which is related to the Schur complement.
 
