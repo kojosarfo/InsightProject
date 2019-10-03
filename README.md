@@ -7,9 +7,7 @@ Predicting pedestrian and cyclist traffic in Downtown Toronto
 <img src="pedestrianTraffic.jpg"
 width="1000" height="300" />
 
-The web app can be assessed [here](http://torontotraffic.live:8866).
-
-If for some reason the link is broken, a demo of it is shown [here](https://hnet.com/video-to-webp/viewimage/20191003-06-v6zlVNZ4fITIE3AL-vRbgLl-Hnet).
+The web app can be assessed [here](http://torontotraffic.live:8866). If for some reason the link is broken, a demo of it is shown [here](https://hnet.com/video-to-webp/viewimage/20191003-06-v6zlVNZ4fITIE3AL-vRbgLl-Hnet).
 
 Description
 -------------
