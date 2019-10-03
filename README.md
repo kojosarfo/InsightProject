@@ -7,7 +7,7 @@ Predicting pedestrian and cyclist traffic in Downtown Toronto
 <img src="pedestrianTraffic.jpg"
 width="1000" height="300" />
 
-The web app can be assessed [here](torontotraffic.live:8866)
+The web app can be assessed [here](http://torontotraffic.live:8866)
 
 Description
 -------------
@@ -31,7 +31,7 @@ One non-autoregressive approach to tackling this problem is Gaussian process reg
 
 The training involved in Gaussian process regression is mainly in optimising the length scale parameters of the radial basis function kernel which make up the covariance function, by maximising the marginal likelihood of the data. Being non-parametric, GPR uses the training data for prediction, and is also able to provide the expected value of the test sample as well as the uncertainty of the prediction which is related to the Schur complement.
 
-This work has culminated in a web application: [here](torontotraffic.live:8866)
+This work has culminated in a web application: [here](http://torontotraffic.live:8866)
 
 The main drawback of GPR is that it doesn't scale well with large amounts of training data, since it involves matrix inversion, and thus, its complexity is cubic in terms of the amount of training examples. For this reason, the GPR model, on which the web app is based, is trained on only one month's worth of data to make it feasible to host on an AWS Free Tier instance. Better results may be obtained if more computational power and memory are available.
 
