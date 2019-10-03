@@ -15,7 +15,7 @@ For many people, the above image looks quite familiar, especially during rush ho
 
 The Big Data Innovation Team at the City of Toronto has only now acquired some historical data for some 14 intersections in Downtown, and I’m consulting with them to predict pedestrian/ cyclist traffic in Downtown -- in order to better optimise traffic signalling,  and better assess the impact of road closures on pedestrian movement.
 
-However, the peculiarities of the problem do not allow a straightforward application of classical forecasting techniques. While we're looking to predict pedestrian/cyclist traffic about two weeks into the future, there are often significant periods of missing data due to ocasional breakdowns of traffic monitors, so that the forecast model should also be capable of gap-filling these intervals of missing data. Furthermore, not all interesections in Downtown have these traffic monitors, and consequently, the model has to be able to provide estimates for those intersections that are not currently monitored.
+However, the peculiarities of the problem do not allow a straightforward application of classical forecasting techniques. While we're looking to predict pedestrian/cyclist traffic about two weeks into the future, there are often significant periods of missing data due to occasional breakdowns of traffic monitors, so that the forecast model should also be capable of gap-filling these intervals of missing data. Furthermore, not all intersections in Downtown have these traffic monitors, and consequently, the model has to be able to provide estimates for those intersections that are not currently monitored.
 
 Data
 ------
