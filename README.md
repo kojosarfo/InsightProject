@@ -21,9 +21,9 @@ Data
 ------
 A csv dump of data detailing the pedestrian and cyclist volumes observed at approximately 14 intersections in downtown Toronto between May and August 2019 inclusive has been provided. The sampling frequency at each intersection is 1 to 2 minutes, each intersection is monitored 24 hours a day, and volumes are disaggregated by direction of travel.
 
-A snapshot of the data for a given intersection is shown below for a single day:
+A snapshot of the data for a given intersection is shown below:
 <img src="saved/kingyonge.png"
-width="500" height="300" />
+width="500" height="300" class="center" />
 
 Moreover, the Big Data Innovation Team believes that, unlike for vehicular traffic for which they are currently productionising models to predict and gap-fill traffic volumes, pedestrian traffic are much more sensitive to other factors like weather conditions, and that any predictive model would need to incorporate these data. For this reason, I scraped historical weather data for the period over which the traffic data was collected from World Weather Online, and augmented it to the traffic data.
 
@@ -34,6 +34,14 @@ Classical time-series methods such as ARIMA fail, if there are too many chunks o
 One non-autoregressive approach to tackling this problem is Gaussian process regression GPR, which, in our case, assumes that the traffic volumes at different intersections are jointly normally distributed, with some constant mean and covariance function. A very common covariance function is the radial basis function kernel, which, being based on the squared Euclidean distance, implies that intersections that are closer together will be more heavily correlated in their traffic volumes than those farther away. This easily provides a Bayesian framework for predicting traffic at locations without historical data, conditioned on the traffic at locations with historical data. More so, one can think of the proximity in the covariance function not just in terms of the spatial co-ordinates of the intersections, but in terms of time as well. For example, all things being equal, the traffic at 8 am today is expected to correlate well with that at 8:00 tomorrow or 7:50 yesterday, so that GPR presents a way of forecasting or gap-filling missing data conditioned on the data at arbitrary spatio-temporal instances.
 
 The training involved in Gaussian process regression is mainly in optimising the length scale parameters of the radial basis function kernel which make up the covariance function, by maximising the marginal likelihood of the data. Being non-parametric, GPR uses the training data for prediction, and is also able to provide the expected value of the test sample as well as the uncertainty of the prediction which is related to the Schur complement.
+
+A couple results based on Gaussian process regression are shown below:
+
+<img src="saved/forecastresult.png"
+width="500" height="300" class="center" />
+
+<img src="saved/errorresult.png"
+width="500" height="300" class="center" />
 
 This work has culminated in a web application: [here](http://torontotraffic.live:8866)
 
