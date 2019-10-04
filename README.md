@@ -35,7 +35,7 @@ One non-autoregressive approach to tackling this problem is Gaussian process reg
 
 The training involved in Gaussian process regression is mainly in optimising the length scale parameters of the radial basis function kernel which make up the covariance function, by maximising the marginal likelihood of the data. Being non-parametric, GPR uses the training data for prediction, and is also able to provide the expected value of the test sample as well as the uncertainty of the prediction which is related to the Schur complement.
 
-A couple results based on Gaussian process regression are shown below:
+A couple results demonstrating forecasting performance based on Gaussian process prediction are shown below:
 
 <img src="saved/forecastresult.png"
 width="500" height="300" class="aligncenter" />
