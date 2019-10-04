@@ -23,7 +23,7 @@ A csv dump of data detailing the pedestrian and cyclist volumes observed at appr
 
 A snapshot of the data for a given intersection is shown below:
 <img src="saved/kingyonge.png"
-width="500" height="300" class="center" />
+width="500" height="300" class="aligncenter" />
 
 Moreover, the Big Data Innovation Team believes that, unlike for vehicular traffic for which they are currently productionising models to predict and gap-fill traffic volumes, pedestrian traffic are much more sensitive to other factors like weather conditions, and that any predictive model would need to incorporate these data. For this reason, I scraped historical weather data for the period over which the traffic data was collected from World Weather Online, and augmented it to the traffic data.
 
@@ -38,10 +38,10 @@ The training involved in Gaussian process regression is mainly in optimising the
 A couple results based on Gaussian process regression are shown below:
 
 <img src="saved/forecastresult.png"
-width="500" height="300" class="center" />
+width="500" height="300" class="aligncenter" />
 
 <img src="saved/errorresult.png"
-width="500" height="300" class="center" />
+width="500" height="300" class="aligncenter" />
 
 This work has culminated in a web application: [here](http://torontotraffic.live:8866)
 
