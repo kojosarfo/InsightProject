@@ -4,7 +4,7 @@ TrafficSeer
 -------------
 Predicting pedestrian and cyclist traffic in Downtown Toronto
 
-<img src="pedestrianTraffic.jpg"
+<img src="saved/pedestrianTraffic.jpg"
 width="1100" height="300" />
 
 The web app can be assessed [here](http://torontotraffic.live:8866). If for some reason the link is broken, a demo of it is shown [here](https://drive.google.com/open?id=1lo0y4KywdM7H9lHpYjcXyYc-w5jeXX3z).
@@ -20,6 +20,10 @@ However, the peculiarities of the problem do not allow a straightforward applica
 Data
 ------
 A csv dump of data detailing the pedestrian and cyclist volumes observed at approximately 14 intersections in downtown Toronto between May and August 2019 inclusive has been provided. The sampling frequency at each intersection is 1 to 2 minutes, each intersection is monitored 24 hours a day, and volumes are disaggregated by direction of travel.
+
+A snapshot of the data for a given intersection is shown below for a single day:
+<img src="saved/kingyonge.png"
+width="500" height="300" />
 
 Moreover, the Big Data Innovation Team believes that, unlike for vehicular traffic for which they are currently productionising models to predict and gap-fill traffic volumes, pedestrian traffic are much more sensitive to other factors like weather conditions, and that any predictive model would need to incorporate these data. For this reason, I scraped historical weather data for the period over which the traffic data was collected from World Weather Online, and augmented it to the traffic data.
 
