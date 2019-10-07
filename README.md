@@ -5,7 +5,7 @@ TrafficSeer
 Predicting pedestrian and cyclist traffic in Downtown Toronto
 
 <img src="saved/torontotraffic.png"
-width="1100" height="300" />
+width="1100" height="400" />
 
 The web app can be assessed [here](http://torontotraffic.live:8866). If for some reason the link is broken, a demo of it is shown [here](https://drive.google.com/open?id=1lo0y4KywdM7H9lHpYjcXyYc-w5jeXX3z).
 
